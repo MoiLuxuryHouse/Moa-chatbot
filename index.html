@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Móa Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ccc;
+        }
+        #input-area {
+            display: flex;
+            padding: 10px;
+        }
+        #question {
+            flex: 1;
+            padding: 8px;
+            font-size: 16px;
+        }
+        #send {
+            padding: 8px 16px;
+            font-size: 16px;
+            margin-left: 5px;
+        }
+        .message {
+            margin: 5px 0;
+        }
+        .user {
+            color: blue;
+        }
+        .bot {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div id="messages"></div>
+    <div id="input-area">
+        <input type="text" id="question" placeholder="Ask Móa..."/>
+        <button id="send">Send</button>
+    </div>
+    <script>
+        const messagesEl = document.getElementById('messages');
+        const questionInput = document.getElementById('question');
+        const sendBtn = document.getElementById('send');
+        const endpoint = 'https://script.google.com/macros/s/AKfycbxnqm4KhhjOUdWnfDxd1jbKb-jTf9denD2GdGe_LvObtA29Ttfz8AG8jUsnG-iDEFW7/exec';
+
+        function appendMessage(text, cls) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.className = 'message ' + cls;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function sendQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return;
+            appendMessage('You: ' + question, 'user');
+            questionInput.value = '';
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question })
+            })
+            .then(res => res.text())
+            .then(reply => {
+                appendMessage('Móa: ' + reply, 'bot');
+            })
+            .catch(err => {
+                appendMessage('Error: ' + err.message, 'bot');
+            });
+        }
+
+        sendBtn.addEventListener('click', sendQuestion);
+        questionInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendQuestion();
+            }
+        });
+    </script>
+</body>
+</html>
